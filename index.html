@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Repertoire Game Comparison</title>
+</head>
+<body>
+	<div>
+		<label for="repertoire">Your Repertoire:</label>
+		<textarea id="repertoire" name="repertoire" rows="10" cols="50"></textarea>
+	</div>
+	<div>
+		<label for="game">Your Game:</label>
+		<textarea id="game" name="game" rows="10" cols="50"></textarea>
+	</div>
+	<button onclick="compare()">Compare</button>
+
+	<script>
+		function compare() {
+			var repertoire = document.getElementById("repertoire").value;
+			var game = document.getElementById("game").value;
+			
+			if (repertoire === game) {
+				alert("Your game is in your repertoire!");
+			} else {
+				alert("Your game is not in your repertoire.");
+			}
+		}
+	</script>
+</body>
+</html>
