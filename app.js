@@ -1,7 +1,8 @@
-import {Pgn} from "cm-pgn"
-
+import {Pgn} from "./cm-pgn/src/cm-pgn/Pgn.js";
 
 function findFirstDiscrepancy(repertoire, game) {
+  alert('yo')
+  console.log(repertoire, game)
   let curr_parent = repertoire;
   let index = 0;
   for (let i =0; i<game.length; i++){
@@ -31,6 +32,7 @@ function findFirstDiscrepancy(repertoire, game) {
 let btn = document.querySelector('#show');
 
 btn.addEventListener('click', function () {
-  let repertoire = new Pgn(document.querySelector('#repertoire').value);
-  let game_moves = new Pgn(document.querySelector('#game').value);
+  let repertoire = new Pgn(window.parent.document.querySelector('#repertoire').value);
+  let game_moves = new Pgn(window.parent.document.querySelector('#game').value);
+  findFirstDiscrepancy(repertoire.history.moves, game_moves.history.moves)
 });
