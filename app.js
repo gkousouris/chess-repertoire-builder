@@ -1,4 +1,4 @@
-import {Pgn} from "./node_modules/cm-pgn/src/cm-pgn/Pgn.js"
+import {Pgn} from "cm-pgn"
 
 
 function findFirstDiscrepancy(repertoire, game) {
