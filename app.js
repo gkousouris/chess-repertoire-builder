@@ -1,8 +1,6 @@
 import {Pgn} from "./cm-pgn/src/cm-pgn/Pgn.js";
 
 function findFirstDiscrepancy(repertoire, game) {
-  alert('yo')
-  console.log(repertoire, game)
   let curr_parent = repertoire;
   let index = 0;
   for (let i =0; i<game.length; i++){
