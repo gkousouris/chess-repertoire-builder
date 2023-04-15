@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "chess.js": "^1.0.0-beta.4",
+    "cm-pgn": "^2.3.1"
+  }
+}
