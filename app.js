@@ -3,6 +3,7 @@ import {Pgn} from "./cm-pgn/src/cm-pgn/Pgn.js";
 function findFirstDiscrepancy(repertoire, game) {
   let curr_parent = repertoire;
   let index = 0;
+  
   for (let i =0; i<game.length; i++){
 
     if (curr_parent[index].san == game[i].san) {
@@ -25,6 +26,7 @@ function findFirstDiscrepancy(repertoire, game) {
     document.getElementById('result').innerHTML = message;
     break;
   }
+
 }
 
 let btn = document.querySelector('#show');
