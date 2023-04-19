@@ -174,7 +174,7 @@ def get_mistake_blunder_likelihood_from_fen(fen, mistake_threshold=200, blunder_
             new_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
 
         # Calculate evaluation difference
-        diff = abs(new_eval - current_eval)
+        diff = new_eval - current_eval
         if diff >= mistake_threshold:
             mistake_likelihood += get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci")    
         if diff >= blunder_threshold:
@@ -197,4 +197,103 @@ def get_mistake_blunder_likelihood_from_fen(fen, mistake_threshold=200, blunder_
     
     return
 
+
+def get_sharpest_lines_from_fen(fen="rn1qk1nr/pp3pbp/4p1p1/2ppP3/3P4/2N2B1P/PPP2PP1/R1BQK2R w KQkq - 0 9", mistake_threshold=150, blunder_threshold=400, verbose=True):
+    # Put thresholds negative when analysing white moves 
+    # and positive when analysing black moves
+    
+    opening_explorer_from_fen = opening_explorer(fen)
+    total_games = get_total_games_played(opening_explorer_from_fen, from_popularity=0, to_popularity=-1)
+    
+    # Get initial eval
+    stockfish.set_fen_position(fen)
+    current_position = stockfish.get_fen_position()
+    try:
+        current_eval = engine_cloud_eval(fen, multiPv="1")["pvs"][0]["cp"]
+    except:
+        current_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
+    
+    for move in opening_explorer_from_fen["moves"]:
+        # Checking that it has enough games in the Opening Explorer to make stats
+        if get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci")>5:
+            
+            # Initialise
+            mistake_likelihood = 0
+            blunder_likelihood = 0
+            good_move = []
+            stockfish.set_fen_position(fen)
+            current_position = stockfish.get_fen_position()
+
+            # Fixing issue with castling
+            if (move["san"]=='O-O')&(move["uci"]=='e8h8'):
+                move["uci"]='e8g8'
+            if (move["san"]=="O-O-O")&(move["uci"]=='e8a8'):
+                move["uci"]='e8c8'
+            if (move["san"]=='O-O')&(move["uci"]=='e1h1'):
+                move["uci"]='e1g1'
+            if (move["san"]=="O-O-O")&(move["uci"]=='e1a1'):
+                move["uci"]='e1c1'
+
+            # Make a move from the Opening Explorer
+            stockfish.make_moves_from_current_position([move["uci"]])
+            new_position = stockfish.get_fen_position()
+            opening_explorer_from_new_fen = opening_explorer(new_position)
+            new_total_games = get_total_games_played(opening_explorer_from_new_fen, from_popularity=0, to_popularity=-1)
+
+            # Get intermediate eval
+            try:
+                intermediate_eval = engine_cloud_eval(new_position, multiPv="1")["pvs"][0]["cp"]
+            except:
+                intermediate_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
+            # diff = intermediate_eval - current_eval
+
+            print("Your move:", move["san"], 
+                  "(popularity:", '{:.1%}'.format(round(get_total_games_played(opening_explorer_from_fen, 
+                                                               from_move=move["uci"], 
+                                                               move_system="uci") / total_games, 3)
+                                                 ), 
+                  ", eval:", round(intermediate_eval/100,1), ")")
+
+            for new_move in opening_explorer_from_new_fen["moves"]:
+                # Reinitialise
+                stockfish.set_fen_position(new_position)
+                new_position = stockfish.get_fen_position() 
+
+                # Play new move
+                stockfish.make_moves_from_current_position([new_move["uci"]])
+                newest_position = stockfish.get_fen_position()
+
+                # Getting new eval
+                try:
+                    newest_eval = engine_cloud_eval(newest_position, multiPv="1")["pvs"][0]["cp"]
+                except:
+                    newest_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
+
+                # Calculate evaluation difference
+                diff = newest_eval - current_eval
+                if diff >= mistake_threshold:
+                    mistake_likelihood += get_total_games_played(opening_explorer_from_new_fen, from_move=new_move["uci"], move_system="uci")    
+                if diff >= blunder_threshold:
+                    blunder_likelihood += get_total_games_played(opening_explorer_from_new_fen, from_move=new_move["uci"], move_system="uci")        
+                if diff < mistake_threshold:
+                    good_move.append(new_move)
+
+                if verbose==True:
+                    print("New move:", new_move["san"])
+                    print(move["san"], 
+                          get_total_games_played(opening_explorer_from_new_fen, from_move=new_move["uci"], move_system="uci"), 
+                          new_total_games,
+                          round(get_total_games_played(opening_explorer_from_new_fen, from_move=new_move["uci"], move_system="uci") / new_total_games, 3),
+                          diff
+                     )
+
+        # Move is not popular enough in the Opening Explorer, go to next move
+        else:
+            break
+
+        print("Opponent will have a", '{:.1%}'.format(mistake_likelihood / new_total_games), "chance to commit a mistake")
+        print("Opponent will have a", '{:.1%}'.format(blunder_likelihood / new_total_games), "chance to commit a blunder")
+        print("")
+    
+    return
 
