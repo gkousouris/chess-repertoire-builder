@@ -132,9 +132,7 @@ def analyse_missed_opportunity_from_fen(starting_fen, following_fen, threshold=1
     return 
 
 
-def get_mistake_blunder_likelihood_from_fen(fen, mistake_threshold=200, blunder_threshold=500, verbose=False):
-    # Put thresholds negative when analysing white moves 
-    # and positive when analysing black moves
+def get_mistake_blunder_likelihood_from_fen(fen, mistake_threshold=150, blunder_threshold=400, verbose=False):
     
     opening_explorer_from_fen = opening_explorer(fen)
     mistake_likelihood = 0
@@ -175,12 +173,22 @@ def get_mistake_blunder_likelihood_from_fen(fen, mistake_threshold=200, blunder_
 
         # Calculate evaluation difference
         diff = new_eval - current_eval
-        if diff >= mistake_threshold:
-            mistake_likelihood += get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci")    
-        if diff >= blunder_threshold:
-            blunder_likelihood += get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci")        
-        if diff < mistake_threshold:
-            good_move.append(move)
+        
+        # Automatically identifying if we're evaluating black or white
+        if fen.split(" ")[1] == 'w':
+            if diff <= mistake_threshold * -1:
+                mistake_likelihood += get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci")    
+            if diff <= blunder_threshold * -1:
+                blunder_likelihood += get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci")        
+            if diff > mistake_threshold * -1:
+                good_move.append(move)
+        else:
+            if diff >= mistake_threshold:
+                mistake_likelihood += get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci")    
+            if diff >= blunder_threshold:
+                blunder_likelihood += get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci")        
+            if diff < mistake_threshold:
+                good_move.append(move)
 
         if verbose==True:
             print(move["uci"], 
@@ -190,10 +198,13 @@ def get_mistake_blunder_likelihood_from_fen(fen, mistake_threshold=200, blunder_
                   diff
              )
     
-    print("")
-    print("Opponent has", len(good_move), "good move(s) in this position")
-    print("Opponent has a", '{:.1%}'.format(mistake_likelihood / total_games), "chance to commit a mistake")
-    print("Opponent has a", '{:.1%}'.format(blunder_likelihood / total_games), "chance to commit a blunder")
+    try:
+        print("")
+        print("Opponent has", len(good_move), "good move(s) in this position")
+        print("Opponent has a", '{:.1%}'.format(mistake_likelihood / total_games), "chance to commit a mistake")
+        print("Opponent has a", '{:.1%}'.format(blunder_likelihood / total_games), "chance to commit a blunder")
+    except:
+        print("Not enough games in Opening Explorer")
     
     return
 
@@ -270,13 +281,23 @@ def get_sharpest_lines_from_fen(fen="rn1qk1nr/pp3pbp/4p1p1/2ppP3/3P4/2N2B1P/PPP2
                     newest_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
 
                 # Calculate evaluation difference
-                diff = newest_eval - current_eval
-                if diff >= mistake_threshold:
-                    mistake_likelihood += get_total_games_played(opening_explorer_from_new_fen, from_move=new_move["uci"], move_system="uci")    
-                if diff >= blunder_threshold:
-                    blunder_likelihood += get_total_games_played(opening_explorer_from_new_fen, from_move=new_move["uci"], move_system="uci")        
-                if diff < mistake_threshold:
-                    good_move.append(new_move)
+                diff = newest_eval - current_eval    
+                
+                # Automatically identifying if we're evaluating black or white
+                if newest_position.split(" ")[1] == 'b':
+                    if diff <= mistake_threshold * -1:
+                        mistake_likelihood += get_total_games_played(opening_explorer_from_new_fen, from_move=new_move["uci"], move_system="uci")    
+                    if diff <= blunder_threshold * -1:
+                        blunder_likelihood += get_total_games_played(opening_explorer_from_new_fen, from_move=new_move["uci"], move_system="uci")        
+                    if diff > mistake_threshold * -1:
+                        good_move.append(new_move)
+                else:
+                    if diff >= mistake_threshold:
+                        mistake_likelihood += get_total_games_played(opening_explorer_from_new_fen, from_move=new_move["uci"], move_system="uci")    
+                    if diff >= blunder_threshold:
+                        blunder_likelihood += get_total_games_played(opening_explorer_from_new_fen, from_move=new_move["uci"], move_system="uci")        
+                    if diff < mistake_threshold:
+                        good_move.append(new_move)   
 
                 if verbose==True:
                     print("New move:", new_move["san"])
@@ -291,9 +312,13 @@ def get_sharpest_lines_from_fen(fen="rn1qk1nr/pp3pbp/4p1p1/2ppP3/3P4/2N2B1P/PPP2
         else:
             break
 
-        print("Opponent will have a", '{:.1%}'.format(mistake_likelihood / new_total_games), "chance to commit a mistake")
-        print("Opponent will have a", '{:.1%}'.format(blunder_likelihood / new_total_games), "chance to commit a blunder")
-        print("")
+        try:
+            print("Opponent has", len(good_move), "good move(s) in this position")
+            print("Opponent has a", '{:.1%}'.format(mistake_likelihood / new_total_games), "chance to commit a mistake")
+            print("Opponent has a", '{:.1%}'.format(blunder_likelihood / new_total_games), "chance to commit a blunder")
+            print("")
+        except:
+            print("Not enough games in Opening Explorer")
     
     return
 
