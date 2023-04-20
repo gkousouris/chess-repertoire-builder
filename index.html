@@ -2,20 +2,35 @@
 <html>
 
 <head>
-    <title>Repertoire Game Comparison</title>
+    <title>FirstMove - Chess Opening Repertoire Builder</title>
+    <meta charset="utf-8">
+    <meta name="description" content="FirstMove is a chess opening repertoire builder that helps you make a strong start in your games.">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
+
 <body>
+    <header>
+        <h1>FirstMove - Chess Opening Repertoire Builder</h1>
+    </header>
+
     <div>
-  		<label for="repertoire">Your Repertoire:</label>
-  		<textarea id="repertoire" name="repertoire" rows="10" cols="50">1. e4 e5 (1... d5 2. exd5) 2. Nf3 Nc6</textarea>
-  	</div>
-  	<div>
-  		<label for="game">Your Game:</label>
-  		<textarea id="game" name="game" rows="10" cols="50">1. e4 f5 2. d4 e6</textarea>
-  	</div>
+        <label for="repertoire">Your Repertoire:</label>
+        <br>
+        <textarea id="repertoire" name="repertoire" rows="10" cols="50">1. e4 e5 (1... d5 2. exd5) 2. Nf3 Nc6</textarea>
+    </div>
+
+    <div>
+        <label for="game">Your Game:</label>
+        <br>
+        <textarea id="game" name="game" rows="10" cols="50">1. e4 f5 2. d4 e6</textarea>
+    </div>
+
     <button id="show">Compare</button>
+
     <div id="result"></div>
+
     <!-- <script src="dist/bundle.js"></script> -->
     <script type="module" src="app.js"></script>
 </body>
+
 </html>
