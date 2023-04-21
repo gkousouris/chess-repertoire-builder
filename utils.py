@@ -1,13 +1,9 @@
 from stockfish import Stockfish
 import random
-import pyautogui
 import time
 import os
 import requests
-from bs4 import BeautifulSoup
 import re
-import webbrowser
-import pyperclip
 import pandas as pd
 import numpy as np
 import seaborn as sns
@@ -132,24 +128,22 @@ def analyse_missed_opportunity_from_fen(starting_fen, following_fen, threshold=1
     return 
 
 
-def get_mistake_blunder_likelihood_from_fen(fen, mistake_threshold=150, blunder_threshold=400, verbose=False):
-    
+def get_mistake_blunder_likelihood_from_fen(fen, mistake_threshold=200, blunder_threshold=500, verbose=False):
+
     opening_explorer_from_fen = opening_explorer(fen)
     mistake_likelihood = 0
     blunder_likelihood = 0
     good_move = []
     total_games = get_total_games_played(opening_explorer_from_fen, from_popularity=0, to_popularity=-1)
-    
+        
     # Get initial eval
     stockfish.set_fen_position(fen)
     current_position = stockfish.get_fen_position()
-    try:
-        current_eval = engine_cloud_eval(fen, multiPv="1")["pvs"][0]["cp"]
-    except:
-        current_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
+    current_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
     
     for move in opening_explorer_from_fen["moves"]:
         # Reinitialise
+        mate_eval = None
         stockfish.set_fen_position(fen)
         current_position = stockfish.get_fen_position()
 
@@ -166,16 +160,26 @@ def get_mistake_blunder_likelihood_from_fen(fen, mistake_threshold=150, blunder_
         # Make a move from the Opening Explorer
         stockfish.make_moves_from_current_position([move["uci"]])
         new_position = stockfish.get_fen_position()
-        try:
-            new_eval = engine_cloud_eval(new_position, multiPv="1")["pvs"][0]["cp"]
-        except:
-            new_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
+        
+        # Handling mates in the eval
+        mate_eval = stockfish.get_top_moves(1)[0]["Mate"]
+        if mate_eval != None:
+            mistake_likelihood += get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci")
+            blunder_likelihood += get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci")
+            print(move["san"], 
+                  get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci"), 
+                  total_games,
+                  round(get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci") / total_games, 3),
+                  "Mate in", mate_eval)
+            continue
+
+        current_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
 
         # Calculate evaluation difference
         diff = new_eval - current_eval
         
         # Automatically identifying if we're evaluating black or white
-        if fen.split(" ")[1] == 'w':
+        if fen.split(" ")[1] == 'b':
             if diff <= mistake_threshold * -1:
                 mistake_likelihood += get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci")    
             if diff <= blunder_threshold * -1:
@@ -191,7 +195,7 @@ def get_mistake_blunder_likelihood_from_fen(fen, mistake_threshold=150, blunder_
                 good_move.append(move)
 
         if verbose==True:
-            print(move["uci"], 
+            print(move["san"], 
                   get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci"), 
                   total_games,
                   round(get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci") / total_games, 3),
@@ -205,11 +209,12 @@ def get_mistake_blunder_likelihood_from_fen(fen, mistake_threshold=150, blunder_
         print("Opponent has a", '{:.1%}'.format(blunder_likelihood / total_games), "chance to commit a blunder")
     except:
         print("Not enough games in Opening Explorer")
+        print("")
     
     return
 
 
-def get_sharpest_lines_from_fen(fen="rn1qk1nr/pp3pbp/4p1p1/2ppP3/3P4/2N2B1P/PPP2PP1/R1BQK2R w KQkq - 0 9", mistake_threshold=150, blunder_threshold=400, verbose=True):
+def get_sharpest_lines_from_fen(fen="rn1qk1nr/pp3pbp/4p1p1/2ppP3/3P4/2N2B1P/PPP2PP1/R1BQK2R w KQkq - 0 9", mistake_threshold=150, blunder_threshold=400, verbose=False):
     # Put thresholds negative when analysing white moves 
     # and positive when analysing black moves
     
@@ -219,16 +224,14 @@ def get_sharpest_lines_from_fen(fen="rn1qk1nr/pp3pbp/4p1p1/2ppP3/3P4/2N2B1P/PPP2
     # Get initial eval
     stockfish.set_fen_position(fen)
     current_position = stockfish.get_fen_position()
-    try:
-        current_eval = engine_cloud_eval(fen, multiPv="1")["pvs"][0]["cp"]
-    except:
-        current_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
+    current_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
     
     for move in opening_explorer_from_fen["moves"]:
         # Checking that it has enough games in the Opening Explorer to make stats
         if get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci")>5:
             
             # Initialise
+            mate_eval = None
             mistake_likelihood = 0
             blunder_likelihood = 0
             good_move = []
@@ -251,37 +254,66 @@ def get_sharpest_lines_from_fen(fen="rn1qk1nr/pp3pbp/4p1p1/2ppP3/3P4/2N2B1P/PPP2
             opening_explorer_from_new_fen = opening_explorer(new_position)
             new_total_games = get_total_games_played(opening_explorer_from_new_fen, from_popularity=0, to_popularity=-1)
 
+            # Handling mates in the eval
+            mate_eval = stockfish.get_top_moves(1)[0]["Mate"]
+            if mate_eval != None:
+                mistake_likelihood += get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci")
+                blunder_likelihood += get_total_games_played(opening_explorer_from_fen, from_move=move["uci"], move_system="uci")
+                print("Your move:", move["san"], 
+                      "(popularity:", '{:.1%}'.format(round(get_total_games_played(opening_explorer_from_fen, 
+                                                                                   from_move=move["uci"], 
+                                                                                   move_system="uci") / total_games, 3)
+                                                     ),
+                  ", eval:", "mate in", mate_eval, ")")
+                print("")
+                continue
+                    
             # Get intermediate eval
-            try:
-                intermediate_eval = engine_cloud_eval(new_position, multiPv="1")["pvs"][0]["cp"]
-            except:
-                intermediate_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
-            # diff = intermediate_eval - current_eval
+            intermediate_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
 
             print("Your move:", move["san"], 
                   "(popularity:", '{:.1%}'.format(round(get_total_games_played(opening_explorer_from_fen, 
-                                                               from_move=move["uci"], 
-                                                               move_system="uci") / total_games, 3)
+                                                        from_move=move["uci"], 
+                                                        move_system="uci") / total_games, 3)
                                                  ), 
                   ", eval:", round(intermediate_eval/100,1), ")")
 
             for new_move in opening_explorer_from_new_fen["moves"]:
                 # Reinitialise
+                mate_eval = None
                 stockfish.set_fen_position(new_position)
                 new_position = stockfish.get_fen_position() 
+                
+                # Fixing issue with castling for the new move too
+                if (new_move["san"]=='O-O')&(new_move["uci"]=='e8h8'):
+                    new_move["uci"]='e8g8'
+                if (new_move["san"]=="O-O-O")&(new_move["uci"]=='e8a8'):
+                    new_move["uci"]='e8c8'
+                if (new_move["san"]=='O-O')&(new_move["uci"]=='e1h1'):
+                    new_move["uci"]='e1g1'
+                if (new_move["san"]=="O-O-O")&(new_move["uci"]=='e1a1'):
+                    new_move["uci"]='e1c1'
 
                 # Play new move
                 stockfish.make_moves_from_current_position([new_move["uci"]])
                 newest_position = stockfish.get_fen_position()
+                
+                # Handling mates in the eval
+                mate_eval = stockfish.get_top_moves(1)[0]["Mate"]
+                if mate_eval != None:
+                    mistake_likelihood += get_total_games_played(opening_explorer_from_new_fen, from_move=new_move["uci"], move_system="uci")
+                    blunder_likelihood += get_total_games_played(opening_explorer_from_new_fen, from_move=new_move["uci"], move_system="uci")
+                    if verbose==True:
+                        print(new_move["san"], 
+                              get_total_games_played(opening_explorer_from_new_fen, from_move=new_move["uci"], move_system="uci"), 
+                              total_games,
+                              round(get_total_games_played(opening_explorer_from_new_fen, from_move=new_move["uci"], move_system="uci") / total_games, 3),
+                              "Mate in", mate_eval)
+                    continue
 
                 # Getting new eval
-                try:
-                    newest_eval = engine_cloud_eval(newest_position, multiPv="1")["pvs"][0]["cp"]
-                except:
-                    newest_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
-
-                # Calculate evaluation difference
-                diff = newest_eval - current_eval    
+                newest_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
+                diff = newest_eval - current_eval
                 
                 # Automatically identifying if we're evaluating black or white
                 if newest_position.split(" ")[1] == 'b':
@@ -297,7 +329,7 @@ def get_sharpest_lines_from_fen(fen="rn1qk1nr/pp3pbp/4p1p1/2ppP3/3P4/2N2B1P/PPP2
                     if diff >= blunder_threshold:
                         blunder_likelihood += get_total_games_played(opening_explorer_from_new_fen, from_move=new_move["uci"], move_system="uci")        
                     if diff < mistake_threshold:
-                        good_move.append(new_move)   
+                        good_move.append(new_move)    
 
                 if verbose==True:
                     print("New move:", new_move["san"])
@@ -310,8 +342,8 @@ def get_sharpest_lines_from_fen(fen="rn1qk1nr/pp3pbp/4p1p1/2ppP3/3P4/2N2B1P/PPP2
 
         # Move is not popular enough in the Opening Explorer, go to next move
         else:
-            break
-
+            continue
+        
         try:
             print("Opponent has", len(good_move), "good move(s) in this position")
             print("Opponent has a", '{:.1%}'.format(mistake_likelihood / new_total_games), "chance to commit a mistake")
@@ -319,6 +351,7 @@ def get_sharpest_lines_from_fen(fen="rn1qk1nr/pp3pbp/4p1p1/2ppP3/3P4/2N2B1P/PPP2
             print("")
         except:
             print("Not enough games in Opening Explorer")
+            print("")
     
     return
 
