@@ -14,7 +14,10 @@ import json
 # pip install chess
 import chess.pgn
 
-stockfish = Stockfish('/usr/local/bin/stockfish')
+try:
+    stockfish = Stockfish('/usr/local/bin/stockfish')
+except:
+    stockfish = Stockfish(r'C:\Users\jewe\Documents\AnacondaProjects\Chess\Stockfish\stockfish_15_win_x64_popcnt\stockfish_15_x64_popcnt.exe')
 
 # IMPORT GAMES
 def get_moves_from_gameID(gameID):
