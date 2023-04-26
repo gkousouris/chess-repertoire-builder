@@ -17,9 +17,7 @@ function findFirstDiscrepancy(repertoire, game) {
 
   for (let i =0; i<game.length; i++){
     const move = game[i];
-    console.log(move);
     const next_parent = curr_parent[move];
-    console.log(next_parent);
     if (!next_parent) {
       let message = '';
       if (i % 2 == 0) { // TODO: Make this work for black repertoires
@@ -42,16 +40,19 @@ function findFirstDiscrepancy(repertoire, game) {
 function processPGN(repertoire) {
   const sanElements = document.querySelector('.tview2').getElementsByTagName('san');
   const sanArray = Array.from(sanElements);
+  if (sanArray.length == 0) {
+    alert('make some moves first');
+    return;
+  }
   const game_pgn = sanArray.map(sanElement => sanElement.innerHTML);
 
   x = findFirstDiscrepancy(repertoire, game_pgn);
-  console.log(x[0] + x[1])
   alert(x[1])
   for (let i=0; i <= x[0]; i++) {
-    sanElements[i].innerHTML += " book"
+    sanElements[i].innerHTML += "  \u{1F4D6}";
   }
 
-  sanElements[x[0]+1].innerHTML += " analyzing.."
+  sanElements[x[0]+1].innerHTML +=  "  \u{1F534}"
 }
 
 processPGN(repertoire)
