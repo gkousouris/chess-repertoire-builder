@@ -48,11 +48,11 @@ function processPGN(repertoire) {
 
   x = findFirstDiscrepancy(repertoire, game_pgn);
   alert(x[1])
-  for (let i=0; i <= x[0]; i++) {
+  for (let i=0; i < x[0]; i++) {
     sanElements[i].innerHTML += "  \u{1F4D6}";
   }
 
-  sanElements[x[0]+1].innerHTML +=  "  \u{1F534}"
+  sanElements[x[0]].innerHTML +=  "  \u{1F534}"
 }
 
 processPGN(repertoire)
