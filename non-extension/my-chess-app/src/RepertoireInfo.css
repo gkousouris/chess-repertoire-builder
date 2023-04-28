@@ -1,0 +1,20 @@
+.update-repertoire {
+  margin-top: 10px;
+}
+
+.update-repertoire-button {
+  background-color: #3333ff;
+  color: white;
+  border: none;
+  padding: 10px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.cancel-update-button {
+  background-color: white;
+  color: #3333ff;
+  border: 1px solid #3333ff;
+  padding: 10px;
+  cursor: pointer;
+}

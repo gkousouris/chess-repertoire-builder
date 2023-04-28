@@ -191,6 +191,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
               const addedNodes = mutation.addedNodes;
               for (const node of addedNodes) {
                 if (node.id === 'analyse-cm' && node.classList.contains('visible')) {
+                  console.log(node);
                   console.log('yoo')
                   const newLink = document.createElement('a');
                   newLink.textContent = 'Add to repertoire';

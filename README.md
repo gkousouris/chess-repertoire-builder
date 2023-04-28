@@ -1,19 +1,20 @@
-# Chess Openings Recommender README
+# How to Upload "Repertoire Extension" to Chrome
+This extension helps chess players build a sharp opening repertoire "one game at a time" by analyzing their games and suggesting forcing variations that put pressure on their opponents.
 
-This is a web app that recommends chess openings based on the moves played by your opponent.
+To use the extension, follow these steps:
 
-## How to Run
+1. Clone the repository to your local machine.
 
-1. Open two terminals in the project directory.
-2. In the first terminal, run the following command to start the front-end:
-    ```
-    http-server
-    ```
-   This will start the front-end server on port 8080.
-3. In the second terminal, run the following command to start the back-end:
-    ```
-    python3 server.py
-    ```
-   This will start the back-end server on port 5000.
-4. Open your web browser and go to `http://localhost:8080`.
-5. Click the 'Compare' Button. Wait for about 10 seconds for the server to respond with the analysis.
+2. Open Google Chrome and navigate to the Extensions page by typing "chrome://extensions/" into the address bar.
+
+3. Turn on "Developer mode" in the top right corner of the page.
+
+4. Click "Load unpacked" and select the "repertoire extension" folder from the cloned repository.
+
+5. The extension should now be uploaded to your Chrome browser and ready to use.
+
+6. Navigate to Lichess and play a game. The extension will analyze the game in real-time and provide suggestions for how to improve your play in the opening phase.
+
+7. Enjoy building your opening repertoire "one game at a time"!
+
+Note: This is just a basic README and assumes some familiarity with Google Chrome and GitHub. If you have any questions or issues with uploading the extension, feel free to reach out to me for help.
