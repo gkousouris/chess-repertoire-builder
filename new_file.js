@@ -76,59 +76,6 @@ for (let i = 1; i < moves.length; i++) {
   }
 }
 
-// let prevNumDot = null;
-// const result = [];
-//
-// for (const move of moves) {
-//   const numDot = move.match(/^\d+\./);
-//   if (numDot && numDot[0] !== prevNumDot) {
-//     result.push(move);
-//     prevNumDot = numDot[0];
-//   } else if (!numDot) {
-//     result.push(move);
-//   }
-// }
-//
-// console.log(result);
-
-
 moves = moves.map(item => item.replace(/^\d+\.+/, ''));
 
 console.log(moves)
-
-// for (let i = 1; i < moves.length; i++) {
-//   if (moves[i] === '...' && moves[i - 1] === '...') {
-//     moves.splice(i, 1);
-//     i--;
-//   } else if (moves[i] === '...' && i > 1) {
-//     moves.splice(i - 1, 1);
-//     moves.splice(i - 2, 1);
-//     i -= 2;
-//   }
-// }
-
-// moves = moves.filter(move => move !== '...');
-
-
-/// ==== Extra code ====
-// const moveChildren = [];
-// let interruptFound = false;
-//
-// for (const child of v.children) {
-//   if (interruptFound || child === activeMove) break;
-//   if (child.tagName === 'MOVE') moveChildren.push(child.innerText);
-//   if (child.tagName === 'INTERRUPT') interruptFound = true;
-// }
-//
-//
-// // -------
-// const moveChildren = [];
-// let interruptFound = false;
-//
-// for (const child of parent.children) {
-//   if (interruptFound || child === activeMove) break;
-//   if (child.tagName === 'MOVE') moveChildren.push(child);
-//   if (child.tagName === 'INTERRUPT') interruptFound = true;
-// }
-//
-// const moves = moveChildren.map(move => move.innerHTML);

@@ -1,4 +1,4 @@
-const repertoire = {
+let repertoire = {
   "e4": {
     "e5": {
       "Bc4": {
@@ -35,7 +35,7 @@ function findFirstDiscrepancy(repertoire, game) {
   }
 
 }
-
+// pgn: 1. e4 e5 (1... e6 2. d4 d6 (2... c5 3. d5 (3. c4) (3. b3 g6 4. g3 b6 5. Bg2 (5. Bb2 Nf6 (5... Bg7)))) (2... b6))
 
 function processPGN(repertoire) {
   const sanElements = document.querySelector('.tview2').getElementsByTagName('san');
@@ -56,3 +56,8 @@ function processPGN(repertoire) {
 }
 
 processPGN(repertoire)
+
+
+
+
+console.log(variation);
