@@ -1,26 +1,11 @@
 import { useState } from 'preact/hooks'
-import { Pgn } from "../node_modules/cm-pgn/src/Pgn.js"
-import { Chess } from 'chess.js'
+import { Pgn } from "cm-pgn/src/Pgn.js"
 
 import preactLogo from './assets/preact.svg'
 import viteLogo from '/vite.svg'
 import './app.css'
 
 export function App() {
-
-  let data = {
-    "e4": {
-        "e5": {}
-    },
-    "Nf3": {
-        "d5": {
-            "g3": {
-                "Nf6": {}
-            }
-        }
-    }
-  }
-
 
 
   function traverseObjectWithLatestParent(object, chess, latestParent = null) {
@@ -37,14 +22,11 @@ export function App() {
   }
 
 
-  
-
-  const chess = new Pgn()
-
-  traverseObjectWithLatestParent(data, chess, 'start');
-  console.log(chess.render());
-
-  const [count, setCount] = useState(0)
+  function convertDataToPGN(game_dict) {
+    const chess = new Pgn()
+    traverseObjectWithLatestParent(game_dict, chess, 'start');
+    return chess.render()
+  }
 
   return (
     <>
@@ -57,14 +39,6 @@ export function App() {
         </a>
       </div>
       <h1>Vite + Preact</h1>
-      <div class="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/app.tsx</code> and save to test HMR
-        </p>
-      </div>
       <p class="read-the-docs">
         Click on the Vite and Preact logos to learn more
       </p>

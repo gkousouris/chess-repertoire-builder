@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Lichess Page Modifier",
+  "version": "1.0",
+  "permissions": ["activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["https://lichess.org/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
