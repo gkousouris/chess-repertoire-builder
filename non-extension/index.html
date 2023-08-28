@@ -1,37 +1,29 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>FirstMove - Chess Opening Repertoire Builder</title>
-    <meta charset="utf-8">
-    <meta name="description" content="FirstMove is a chess opening repertoire builder that helps you make a strong start in your games.">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PGN Parser Example</title>
 </head>
-
 <body>
-    <header>
-        <h1>FirstMove - Chess Opening Repertoire Builder</h1>
-    </header>
 
-    <div>
-        <label for="repertoire">Your Repertoire:</label>
-        <br>
-        <textarea id="repertoire" name="repertoire" rows="10" cols="50">1. e4 e5 (1... d5 2. exd5) 2. Nf3 Nc6</textarea>
-    </div>
+<script type="module">
+console.log('hi')
+  import { Pgn } from "./node_modules/cm-pgn/src/Pgn.js";
+  
+  // Sample PGN data
+  const pgnData = `
+    [Site "Berlin"]
+    [Date "1989.07.02"]
+    [White "Haack, Stefan"]
+    [Black "Maier, Karsten"]
+    
+    1. e4 e5 (e6) 2. Nf3 $1 {Great move!} Nc6 *`;
 
-    <div>
-        <label for="game">Your Game:</label>
-        <br>
-        <textarea id="game" name="game" rows="10" cols="50">1. e4 e5 2. Nf3 d5 3. Nc3 a6</textarea>
-    </div>
+  // Parse PGN
+  const pgn = new Pgn(pgnData);
+  console.log(pgn);
+</script>
 
-    <button id="show">Compare</button>
-
-    <div id="result"></div>
-    <ul id="moves-list"></ul>
-
-    <!-- <script src="dist/bundle.js"></script> -->
-    <script type="module" src="app.js"></script>
 </body>
-
 </html>

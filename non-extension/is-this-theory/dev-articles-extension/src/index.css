@@ -1,0 +1,100 @@
+html {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Open Sans", "Helvetica Neue", sans-serif;
+  font-size: 14px;
+}
+
+body {
+  font-size: 1rem;
+  color: #0f172a;
+  margin: 0;
+}
+
+.container {
+  min-width: 30em;
+  padding: 1em;
+  box-sizing: border-box;
+}
+
+.spinner {
+  display: flex;
+  align-items: center;
+}
+
+.spinner__circle {
+  display: block;
+  width: 1.25em;
+  height: 1.25em;
+  border: 3px solid #bfdbfe;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  box-sizing: border-box;
+  margin-right: 0.5em;
+  animation: spin 1s ease infinite;
+}
+
+.error {
+  display: block;
+  padding: 1em;
+  box-sizing: border-box;
+  border-radius: 10px;
+  background-color: #ffe4e6;
+  color: #e11d48;
+}
+
+.title {
+  font-size: 1.75rem;
+  margin: 0 0 1rem;
+}
+
+.articles {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.article:not(:last-child) {
+  margin-bottom: 1em;
+}
+
+.article__link {
+  display: block;
+  margin-bottom: 0.15em;
+  color: #2563eb;
+  text-decoration: none;
+}
+.article__link:hover {
+  text-decoration: underline;
+}
+
+.article__details {
+  display: flex;
+  align-items: center;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.8em;
+  color: #64748b;
+}
+
+.article__detail:not(:last-child) {
+  margin-right: 0.5rem;
+}
+.article__detail span[role="img"] {
+  margin-right: 0.25rem;
+}
+
+@media (prefers-reduced-motion) {
+  .spinner__circle {
+    animation: spin 2s ease infinite;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -2,10 +2,16 @@
   "name": "Repertoire Builder",
   "version": "1.0",
   "manifest_version": 3,
-  "background": {
-    "service_worker": "background.js",
-    "type": "module"
-  },
+  "content_scripts": [
+    {
+      "matches": ["*://lichess.org/*"],
+      "js": [
+        "./background.js",
+        "./helper-functions.js"
+      ]
+      // "type": "module"
+    }
+  ],  
   "permissions": [
     "storage",
     "activeTab",

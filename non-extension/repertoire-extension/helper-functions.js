@@ -1,6 +1,7 @@
 function addBookSymbol(move) {
   const innerText = move.innerText;
 
+  if (innerText === ('...')) return;
   if (innerText.includes('\u{1F534}')) {
     move.innerText = innerText.replace(/\u{1F534}/gu, '\u{1F4D6}');
   } else if (!innerText.includes('\u{1F4D6}')) {
@@ -8,8 +9,24 @@ function addBookSymbol(move) {
   }
 }
 
+function addBlunderSymbol(move) {
+  const innerText = move.innerText;
+
+  if (!innerText.includes('\u{1F534}')) {
+    move.innerText = innerText + ' \u{1F534}';
+  }
+}
+
+
+
+function remove_unicodes(moves) {
+  return moves.map(move => move.replace(/ \p{So}/ug, '').trim());
+}
+
 
 function findFirstDiscrepancy(repertoire, game) {
+  game = remove_unicodes(game);
+  console.log(game);
   let curr_parent = repertoire;
   let index = 0;
   let i;
@@ -22,7 +39,7 @@ function findFirstDiscrepancy(repertoire, game) {
         let move_num = (i + 2) / 2;
         message += 'You played ' + move_num + ". " + move + ', whereas your repertoire has ' + (Object.keys(curr_parent).length > 0 ? 'one of the following moves: ' + Object.keys(curr_parent).join(', ') : 'ended');
       } else {
-        message += 'Black played ' + (i + 1) / 2 + ". ..." + move + ', which was not in your repertoire. You should study it.'
+        message += 'Blacks played ' + (i + 1) / 2 + ". ..." + move + ', which was not in your repertoire. You should study it.'
       }
       return [i, message]
       break;
@@ -49,9 +66,9 @@ function processPGN(repertoire) {
   console.log(x);
   // alert(x[1])
   for (let i=0; i < x[0]; i++) {
-    sanElements[i].innerHTML += "  \u{1F4D6}";
+    addBookSymbol(sanElements[i])
   }
-  if (sanElements[x[0]]) sanElements[x[0]].innerHTML +=  "  \u{1F534}"
+  if (sanElements[x[0]]) addBlunderSymbol(sanElements[x[0]])
 }
 
 // processPGN(repertoire)
@@ -143,5 +160,8 @@ function getMoves(activeMove) {
 
 
   repertoire = expandRepertoire(moves, repertoire)
+  console.log('setting..')
   localStorage.setItem('repertoire', JSON.stringify(repertoire));
+
 }
+
