@@ -1,12 +1,22 @@
 {
   "manifest_version": 3,
-  "name": "Lichess Page Modifier",
+  "name": "Is this Theory ?",
   "version": "1.0",
   "permissions": ["activeTab"],
+  "icons": {
+    "16": "images/red_logo.png",
+    "48": "images/red_logo.png",
+    "128": "images/red_logo.png"
+  },
   "content_scripts": [
     {
-      "matches": ["https://lichess.org/*"],
-      "js": ["content.js"]
+      "matches": ["https://lichess.org/*", "https://*.chess.com/*"],
+      "js": [
+        "src/helper-functions.js",
+        "src/adapters/lichess.js",
+        "src/adapters/chess-com.js",
+        "content.js"
+      ]
     }
   ]
 }
