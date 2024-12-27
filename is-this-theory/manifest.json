@@ -15,6 +15,7 @@
         "src/helper-functions.js",
         "src/adapters/lichess.js",
         "src/adapters/chess-com.js",
+        "src/components/MoveMenu.js",
         "content.js"
       ]
     }
