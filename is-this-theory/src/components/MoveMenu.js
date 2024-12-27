@@ -2,7 +2,6 @@ class MoveMenu {
   constructor() {
     this.currentMenu = null;
   }
-
   show(node, onMoveClick) {
     // Remove any existing menu
     this.remove();
@@ -28,8 +27,8 @@ class MoveMenu {
     
     // Position menu near the node
     const rect = node.getBoundingClientRect();
-    menu.style.left = `${rect.left}px`;
-    menu.style.top = `${rect.bottom}px`;
+    menu.style.left = `${rect.right + 10}px`; // Position to the right of the node
+    menu.style.top = `${rect.top}px`; // Align vertically with the node
     
     // Add menu to document
     document.body.appendChild(menu);
