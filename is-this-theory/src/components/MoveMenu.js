@@ -11,13 +11,13 @@ class MoveMenu {
     const menu = document.createElement('div');
     menu.style.position = 'absolute';
     menu.style.backgroundColor = 'white';
-    menu.style.border = '1px solid black';
+    // menu.style.border = '1px solid black';
     menu.style.padding = '5px';
     menu.style.zIndex = '1000';
     
     // Create button
     const button = document.createElement('button');
-    button.textContent = 'Log Move';
+    button.textContent = 'Add to Repertoire';
     button.onclick = () => {
       onMoveClick(node.textContent);
       this.remove();

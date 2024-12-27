@@ -70,6 +70,21 @@ class ChessComAdapter {
     
     console.log('Filtered Node IDs:', filteredNodeIds);
     console.log('Corresponding Moves:', filteredMoves);
+
+    // Add book emoji to each filtered node
+    filteredNodeIds.forEach(nodeId => {
+      const element = document.querySelector(`[data-node="${nodeId}"]`);
+      if (element) {
+        const span = element.querySelector('span');
+        if (span && !span.textContent.includes('📖')) {
+          span.appendChild(document.createTextNode(' 📖'));
+        }
+      }
+    });
+
+    this.repertoire = expandRepertoire(filteredMoves, this.repertoire)
+    console.log('setting..')
+    localStorage.setItem('repertoire', JSON.stringify(this.repertoire));
   }
 
   getBoardElement() {
