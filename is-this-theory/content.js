@@ -35,15 +35,38 @@ function modifyPage() {
   }
 }
 
-// Try to modify page immediately and also after load, since board may load asynchronously
-modifyPage();
-window.addEventListener("load", modifyPage);
-
-// Set up periodic check in case board loads very late
-const checkInterval = setInterval(() => {
+// Function to check for board and call modifyPage
+function checkBoardAndModify() {
   const siteAdapter = getSiteAdapter();
   if (siteAdapter.getBoardElement()) {
     modifyPage();
+    return true;
+  }
+  return false;
+}
+
+// Try to modify page immediately and also after load, since board may load asynchronously
+checkBoardAndModify();
+window.addEventListener("load", () => checkBoardAndModify());
+
+// Listen for URL changes on chess.com's SPA
+let lastUrl = location.href;
+new MutationObserver(() => {
+  const url = location.href;
+  if (url !== lastUrl) {
+    lastUrl = url;
+    // Start checking for board after URL change
+    const urlChangeInterval = setInterval(() => {
+      if (checkBoardAndModify()) {
+        clearInterval(urlChangeInterval);
+      }
+    }, 500);
+  }
+}).observe(document, {subtree: true, childList: true});
+
+// Set up periodic check in case board loads very late
+const checkInterval = setInterval(() => {
+  if (checkBoardAndModify()) {
     clearInterval(checkInterval);
   }
 }, 1000);
