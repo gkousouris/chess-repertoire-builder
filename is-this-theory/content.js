@@ -1,6 +1,4 @@
 // content.js
-console.log("Content script loaded");
-
 function getSiteAdapter() {
   const hostname = window.location.hostname;
   if (hostname.includes('lichess.org')) {
@@ -12,15 +10,12 @@ function getSiteAdapter() {
 }
 
 function modifyPage() {
-  console.log("Modifying page");
   const siteAdapter = getSiteAdapter();
   const board = siteAdapter.getBoardElement();
-  console.log('board', board);
   if (board) {
     //1. get the repertoire
     let repertoire = localStorage.getItem('repertoire');
     repertoire = repertoire ? JSON.parse(repertoire) : {"e4": {}};
-    console.log('parsed repertoire', repertoire);
     processPGN(repertoire);
     
     // Create an observer instance using site-specific selectors
@@ -68,7 +63,5 @@ new MutationObserver(() => {
 const checkInterval = setInterval(() => {
   if (checkBoardAndModify()) {
     clearInterval(checkInterval);
-  } else {
-    console.log('Board not loaded yet');
   }
 }, 1000);
