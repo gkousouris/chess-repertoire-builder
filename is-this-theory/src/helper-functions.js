@@ -11,9 +11,8 @@ function addBookSymbol(move) {
   const moveParent = sanElement || move;
   const evalTag = moveParent.querySelector('eval');
 
-  // Check if emoji already exists in any child spans
-  const hasEmoji = Array.from(moveParent.getElementsByTagName('span'))
-    .some(span => span.textContent.includes('📖'));
+  // Check if emoji already exists in innerHTML
+  const hasEmoji = moveParent.innerHTML.includes('📖');
 
   // Only add if emoji isn't already present
   if (!hasEmoji) {
