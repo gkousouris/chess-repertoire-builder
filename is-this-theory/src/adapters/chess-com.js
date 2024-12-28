@@ -42,6 +42,13 @@ class ChessComAdapter {
       },
       true
     );
+
+    // Add listeners for arrow key presses to hide menu
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        this.moveMenu.remove();
+      }
+    });
   }
 
 

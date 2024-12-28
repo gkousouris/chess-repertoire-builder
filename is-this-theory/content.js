@@ -68,5 +68,7 @@ new MutationObserver(() => {
 const checkInterval = setInterval(() => {
   if (checkBoardAndModify()) {
     clearInterval(checkInterval);
+  } else {
+    console.log('Board not loaded yet');
   }
 }, 1000);

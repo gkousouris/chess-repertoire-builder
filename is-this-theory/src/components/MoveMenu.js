@@ -27,9 +27,13 @@ class MoveMenu {
     
     // Position menu near the node
     const rect = node.getBoundingClientRect();
-    menu.style.left = `${rect.right + 10}px`; // Position to the right of the node
+    const parent = node.closest('.white-move, .black-move');
+    if (parent && parent.classList.contains('white-move')) {
+      menu.style.left = `${rect.left - 150}px`; // Position far to the left of white moves
+    } else {
+      menu.style.left = `${rect.right + 10}px`; // Position to the right of black moves
+    }
     menu.style.top = `${rect.top}px`; // Align vertically with the node
-    
     // Add menu to document
     document.body.appendChild(menu);
     this.currentMenu = menu;
