@@ -1,0 +1,24 @@
+{
+  "name": "Repertoire Builder",
+  "version": "1.0",
+  "manifest_version": 3,
+  "content_scripts": [
+    {
+      "matches": ["*://lichess.org/*"],
+      "js": [
+        "./background.js",
+        "./helper-functions.js"
+      ]
+      // "type": "module"
+    }
+  ],  
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting",
+    "tabs"
+  ],
+  "host_permissions": [
+  "*://lichess.org/*"
+]
+}

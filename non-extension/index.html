@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PGN Parser Example</title>
+</head>
+<body>
+
+<script type="module">
+console.log('hi')
+  import { Pgn } from "./node_modules/cm-pgn/src/Pgn.js";
+  
+  // Sample PGN data
+  const pgnData = `
+    [Site "Berlin"]
+    [Date "1989.07.02"]
+    [White "Haack, Stefan"]
+    [Black "Maier, Karsten"]
+    
+    1. e4 e5 (e6) 2. Nf3 $1 {Great move!} Nc6 *`;
+
+  // Parse PGN
+  const pgn = new Pgn(pgnData);
+  console.log(pgn);
+</script>
+
+</body>
+</html>
