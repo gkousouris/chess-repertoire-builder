@@ -37,7 +37,7 @@ export function App() {
 }
 
 function processVariations(tree, variations) {
-    for (const move of variations) 
+    for (const move of variations) {
         console.log(move)
         if (move.variations.length) {
             tree[move.san] = {};
