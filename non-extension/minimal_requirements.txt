@@ -1,0 +1,9 @@
+flask==2.0.1
+flask-cors==3.0.10
+chess==1.9.2
+stockfish==3.28.0
+requests==2.28.1
+pandas
+numpy
+matplotlib
+seaborn

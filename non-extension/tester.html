@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Repertoire Builder Tester</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Using local chess.js file -->
+    <script src="assets/chess.js/chess.min.js"></script>
+    <!-- Using local chessboard.js files -->
+    <script src="assets/chessboardjs/js/chessboard-1.0.0.min.js"></script>
+    <link rel="stylesheet" href="assets/chessboardjs/css/chessboard-1.0.0.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .input-section {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .results-section {
+            flex: 2;
+            min-width: 400px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .board-container {
+            width: 400px;
+            margin: 20px 0;
+        }
+        textarea {
+            width: 100%;
+            min-height: 100px;
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .result-message {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+        }
+        .move-list {
+            margin-top: 20px;
+        }
+        .move {
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #f5f5f5;
+            border-radius: 3px;
+        }
+        .example-btn {
+            background-color: #2196F3;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .examples {
+            margin-bottom: 15px;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #ffe8e8;
+            border-radius: 3px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chess Repertoire Builder Tester</h1>
+    
+    <div class="status" id="status-message">
+        Checking server status...
+    </div>
+    
+    <div class="container">
+        <div class="input-section">
+            <h2>Input</h2>
+            
+            <div class="examples">
+                <h3>Examples:</h3>
+                <button class="example-btn" id="example1">Spanish Game</button>
+                <button class="example-btn" id="example2">Sicilian Defense</button>
+                <button class="example-btn" id="example3">Queen's Gambit</button>
+            </div>
+            
+            <label for="repertoire">Your Repertoire (PGN):</label>
+            <textarea id="repertoire" placeholder="Enter your chess repertoire in PGN format...">1. e4 e5 (1... c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4) (1... e6 2. d4 d5 3. Nc3) 2. Nf3 Nc6 3. Bb5</textarea>
+            
+            <label for="game">Current Game (PGN):</label>
+            <textarea id="game" placeholder="Enter the current game in PGN format...">1. e4 e5 2. Nf3 Nc6 3. Bc4</textarea>
+            
+            <div>
+                <input type="radio" id="is-white" name="color" value="white" checked>
+                <label for="is-white">I'm playing White</label>
+                
+                <input type="radio" id="is-black" name="color" value="black">
+                <label for="is-black">I'm playing Black</label>
+            </div>
+            
+            <button id="analyze-btn">Analyze Deviation</button>
+        </div>
+        
+        <div class="results-section">
+            <h2>Results</h2>
+            
+            <div class="board-container">
+                <div id="board"></div>
+            </div>
+            
+            <div id="result-message" class="result-message">
+                Results will appear here after analysis.
+            </div>
+            
+            <div id="sharp-lines" class="move-list">
+                <!-- Sharp lines will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variable for the board and arrow objects
+        var board = null;
+        var arrows = [];
+        
+        // Wait for the document to be fully loaded
+        $(document).ready(function() {
+            console.log("Document ready");
+            
+            // Initialize chessboard with the correct piece theme path
+            board = Chessboard('board', {
+                position: 'start',
+                pieceTheme: 'assets/chessboardjs/img/chesspieces/wikipedia/{piece}.png',
+                orientation: $("#is-white").prop("checked") ? 'white' : 'black'
+            });
+            
+            // Add event listeners for color selection to flip board when changed
+            $("#is-white, #is-black").on('change', function() {
+                const isWhite = $("#is-white").prop("checked");
+                removeAllArrows(); // Reset arrows before flipping
+                board.orientation(isWhite ? 'white' : 'black');
+            });
+            
+            // Check server status
+            checkServerStatus();
+            
+            // Example data - using jQuery properly for button clicks
+            $("#example1").on('click', function() {
+                console.log("Example 1 clicked");
+                $("#repertoire").val("1. e4 e5 2. Nf3 Nc6 3. Bb5");
+                $("#game").val("1. e4 e5 2. Nf3 Nc6 3. Bc4");
+                $("#is-white").prop("checked", true);
+            });
+            
+            $("#example2").on('click', function() {
+                console.log("Example 2 clicked");
+                $("#repertoire").val("1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3");
+                $("#game").val("1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Bc4");
+                $("#is-white").prop("checked", true);
+            });
+            
+            $("#example3").on('click', function() {
+                console.log("Example 3 clicked");
+                $("#repertoire").val("1. d4 d5 2. c4 e6 3. Nc3 Nf6");
+                $("#game").val("1. d4 d5 2. c4 e6 3. Nc3 c6");
+                $("#is-white").prop("checked", true);
+            });
+            
+            // Analyze button click handler
+            $("#analyze-btn").on('click', function() {
+                console.log("Analyze button clicked");
+                const repertoire = $("#repertoire").val();
+                const game = $("#game").val();
+                const isUserWhite = $("#is-white").prop("checked");
+                
+                $("#result-message").html("Analyzing... Please wait.");
+                $("#sharp-lines").empty();
+                
+                // Call the real server API
+                realAnalyzeDeviation(repertoire, game, isUserWhite);
+            });
+        });
+        
+        function checkServerStatus() {
+            $.ajax({
+                url: "http://127.0.0.1:5000/",
+                type: "GET",
+                success: function(response) {
+                    $("#status-message").html("Server is running correctly: " + response).css("background-color", "#e8ffe8").show();
+                    setTimeout(function() {
+                        $("#status-message").fadeOut(1000);
+                    }, 3000);
+                },
+                error: function(xhr, status, error) {
+                    $("#status-message").html("Server error: " + error + ". Make sure the Flask server is running at http://127.0.0.1:5000/").css("background-color", "#ffe8e8").show();
+                }
+            });
+        }
+        
+        function parsePgn(pgn) {
+            // Very simple PGN parser for demo purposes
+            const movesText = pgn.replace(/\(\s*.*?\s*\)/g, "") // Remove variations like (1... c5)
+                               .replace(/\d+\.\s*/g, "") // Remove move numbers like "1. "
+                               .replace(/\s+/g, " ") // Normalize whitespace
+                               .trim();
+            return movesText.split(" ");
+        }
+        
+        function displayResults(result) {
+            // If no deviation is detected, show congratulatory message
+            if (result.message && result.message.includes("No deviation detected")) {
+                $("#result-message").html("Congratulations! You perfectly followed your repertoire. Keep up the great work!");
+            } else {
+                $("#result-message").html(result.message || "Analysis complete");
+            }
+            
+            // Clear any existing arrows
+            removeAllArrows();
+            
+            // Add arrows for best move (green) and sharpest line (purple) if provided
+            if (result.bestMove) {
+                addArrow(result.bestMove.from, result.bestMove.to, '#00ff00'); // Green arrow for best move
+            }
+            
+            if (result.sharpestLine) {
+                addArrow(result.sharpestLine.from, result.sharpestLine.to, '#800080'); // Purple arrow for sharpest line
+            }
+            
+            // Display sharp lines
+            const linesDiv = $("#sharp-lines");
+            linesDiv.empty();
+            
+            if (result.moves && result.moves.length > 0) {
+                linesDiv.append("<h3>Sharp Lines Analysis:</h3>");
+                
+                result.moves.forEach(move => {
+                    linesDiv.append(`<div class="move">${move}</div>`);
+                });
+            }
+        }
+        
+        // Function to add an arrow to the board
+        function addArrow(from, to, color) {
+            // Create arrow element
+            const $arrow = $('<div class="arrow"></div>').css({
+                position: 'absolute',
+                zIndex: 100,
+                pointerEvents: 'none',
+                backgroundColor: color,
+                opacity: 0.7
+            });
+            
+            // Get positions of squares
+            const $fromSquare = $(`.square-${from}`);
+            const $toSquare = $(`.square-${to}`);
+            
+            if ($fromSquare.length && $toSquare.length) {
+                const fromPos = $fromSquare.position();
+                const toPos = $toSquare.position();
+                const squareSize = $fromSquare.width();
+                
+                // Calculate arrow position and angle
+                const centerX1 = fromPos.left + squareSize / 2;
+                const centerY1 = fromPos.top + squareSize / 2;
+                const centerX2 = toPos.left + squareSize / 2;
+                const centerY2 = toPos.top + squareSize / 2;
+                
+                const angle = Math.atan2(centerY2 - centerY1, centerX2 - centerX1) * 180 / Math.PI;
+                const length = Math.sqrt(Math.pow(centerX2 - centerX1, 2) + Math.pow(centerY2 - centerY1, 2));
+                
+                // Position and rotate arrow
+                $arrow.css({
+                    left: centerX1,
+                    top: centerY1 - 4,
+                    width: length,
+                    height: 8,
+                    transformOrigin: '0 50%',
+                    transform: `rotate(${angle}deg)`
+                });
+                
+                // Add arrowhead
+                const $arrowhead = $('<div class="arrowhead"></div>').css({
+                    position: 'absolute',
+                    right: -10,
+                    top: -6,
+                    width: 0,
+                    height: 0,
+                    borderTop: '10px solid transparent',
+                    borderBottom: '10px solid transparent',
+                    borderLeft: `15px solid ${color}`
+                });
+                
+                $arrow.append($arrowhead);
+                $('.board-container').append($arrow);
+                
+                // Store arrow for later removal
+                arrows.push($arrow);
+            }
+        }
+        
+        // Function to remove all arrows
+        function removeAllArrows() {
+            arrows.forEach($arrow => $arrow.remove());
+            arrows = [];
+        }
+        
+        function realAnalyzeDeviation(repertoire, game, isUserWhite) {
+            console.log("Sending request to server:", {
+                repertoire: repertoire,
+                game_moves: game,
+                is_user_white: isUserWhite
+            });
+            
+            $.ajax({
+                url: "http://127.0.0.1:5000/evaluateMove",
+                type: "GET",
+                data: {
+                    repertoire: repertoire,
+                    game_moves: game,
+                    is_user_white: isUserWhite
+                },
+                success: function(result) {
+                    console.log("Received result:", result);
+                    
+                    // Update the chessboard with the final position
+                    try {
+                        const chess = new Chess();
+                        const gameMoves = parsePgn(game);
+                        
+                        console.log("Parsed moves:", gameMoves);
+                        
+                        for (const move of gameMoves) {
+                            if (move && move.trim() !== "") {
+                                const moveResult = chess.move(move);
+                                if (!moveResult) {
+                                    console.error("Invalid move:", move);
+                                }
+                            }
+                        }
+                        
+                        // Update the board position
+                        const fen = chess.fen();
+                        console.log("Setting board position to FEN:", fen);
+                        board.position(fen);
+                    } catch (e) {
+                        console.error("Error updating board:", e);
+                    }
+                    
+                    // Display the result
+                    displayResults(result);
+                },
+                error: function(xhr, status, error) {
+                    console.error("Ajax error:", error);
+                    console.error("Response text:", xhr.responseText);
+                    $("#result-message").html(`Server error: ${error}. Details: ${xhr.responseText}`);
+                    $("#sharp-lines").empty();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

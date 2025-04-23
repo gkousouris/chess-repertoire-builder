@@ -10,11 +10,49 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import json
-
-# pip install chess
 import chess.pgn
 
-stockfish = Stockfish('/usr/local/bin/stockfish')
+# Find Stockfish in common locations
+def find_stockfish():
+    stockfish_paths = [
+        '/usr/local/bin/stockfish',
+        '/usr/bin/stockfish',
+        '/usr/games/stockfish',
+        'stockfish',
+        # Add more common paths if needed
+    ]
+    
+    for path in stockfish_paths:
+        if os.path.exists(path):
+            print(f"Found Stockfish at: {path}")
+            return path
+    
+    # Try using 'stockfish' directly (it might be in PATH)
+    try:
+        sf = Stockfish(path="stockfish")
+        return "stockfish"
+    except Exception:
+        pass
+        
+    print("Warning: Stockfish not found. Using cloud evaluation as fallback.")
+    return None
+
+# Initialize stockfish only when needed, not at import time
+# This helps with testing and environments where stockfish isn't installed
+def get_stockfish():
+    global _stockfish
+    if '_stockfish' not in globals() or _stockfish is None:
+        stockfish_path = find_stockfish()
+        if stockfish_path:
+            try:
+                _stockfish = Stockfish(path=stockfish_path)
+                print("Successfully initialized Stockfish engine")
+            except Exception as e:
+                print(f"Error initializing Stockfish: {e}")
+                _stockfish = None
+        else:
+            _stockfish = None
+    return _stockfish
 
 # IMPORT GAMES
 def get_moves_from_gameID(gameID):
@@ -110,6 +148,7 @@ def analyse_missed_opportunity_from_fen(starting_fen, following_fen, threshold=1
     try:
         opportunity_eval = engine_cloud_eval(starting_fen, multiPv="1")["pvs"][0]["cp"]
     except:
+        stockfish = get_stockfish()
         stockfish.set_fen_position(starting_fen)
         current_position = stockfish.get_fen_position()
         opportunity_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
@@ -117,6 +156,7 @@ def analyse_missed_opportunity_from_fen(starting_fen, following_fen, threshold=1
     try:
         played_move_eval = engine_cloud_eval(following_fen, multiPv="1")["pvs"][0]["cp"]
     except:
+        stockfish = get_stockfish()
         stockfish.set_fen_position(following_fen)
         current_position = stockfish.get_fen_position()
         played_move_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
@@ -127,6 +167,7 @@ def analyse_missed_opportunity_from_fen(starting_fen, following_fen, threshold=1
         try:
             print("Missed opportunity to play", engine_cloud_eval(starting_fen, multiPv="1")["pvs"][0]["moves"].split(" ")[0], "to gain an advantage of +", round(diff/100,1))
         except:
+            stockfish = get_stockfish()
             print("Missed opportunity to play", stockfish.get_top_moves(1)[0]["Move"], "to gain an advantage of +", round(diff/100,1))
 
     #elif (engine_cloud_eval(following_fen, multiPv="3")["error"] == 'Not found'):
@@ -144,6 +185,7 @@ def get_mistake_blunder_likelihood_from_fen(fen, mistake_threshold=200, blunder_
     total_games = get_total_games_played(opening_explorer_from_fen, from_popularity=0, to_popularity=-1)
     messages = []
     # Get initial eval
+    stockfish = get_stockfish()
     stockfish.set_fen_position(fen)
     current_position = stockfish.get_fen_position()
     current_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
@@ -151,6 +193,7 @@ def get_mistake_blunder_likelihood_from_fen(fen, mistake_threshold=200, blunder_
     for move in opening_explorer_from_fen["moves"]:
         # Reinitialise
         mate_eval = None
+        stockfish = get_stockfish()
         stockfish.set_fen_position(fen)
         current_position = stockfish.get_fen_position()
 
@@ -235,6 +278,7 @@ def get_sharpest_lines_from_fen(fen="rn1qk1nr/pp3pbp/4p1p1/2ppP3/3P4/2N2B1P/PPP2
     total_games = get_total_games_played(opening_explorer_from_fen, from_popularity=0, to_popularity=-1)
 
     # Get initial eval
+    stockfish = get_stockfish()
     stockfish.set_fen_position(fen)
     current_position = stockfish.get_fen_position()
     current_eval = stockfish.get_top_moves(1)[0]["Centipawn"]
@@ -249,6 +293,7 @@ def get_sharpest_lines_from_fen(fen="rn1qk1nr/pp3pbp/4p1p1/2ppP3/3P4/2N2B1P/PPP2
             mistake_likelihood = 0
             blunder_likelihood = 0
             good_move = []
+            stockfish = get_stockfish()
             stockfish.set_fen_position(fen)
             current_position = stockfish.get_fen_position()
 
@@ -297,6 +342,7 @@ def get_sharpest_lines_from_fen(fen="rn1qk1nr/pp3pbp/4p1p1/2ppP3/3P4/2N2B1P/PPP2
             for new_move in opening_explorer_from_new_fen["moves"][:dev_limit]: # limit the # of lines looked at for dev
                 # Reinitialise
                 mate_eval = None
+                stockfish = get_stockfish()
                 stockfish.set_fen_position(new_position)
                 new_position = stockfish.get_fen_position()
 
